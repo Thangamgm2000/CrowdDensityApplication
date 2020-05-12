@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CrowdDensityApplication</string>
+    <string name="server">"http://ee6d5a0d.ngrok.io"</string>
+</resources>
