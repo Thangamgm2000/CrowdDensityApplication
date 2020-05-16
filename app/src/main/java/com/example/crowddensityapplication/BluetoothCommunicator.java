@@ -247,4 +247,15 @@ public class BluetoothCommunicator extends AppCompatActivity {
         alarmManager.setInexactRepeating(AlarmManager. ELAPSED_REALTIME_WAKEUP , futureInMillis, parseLong, pendingIntent);
     }
 
+    public void stopPingBackground(View v)
+    {
+        Intent notificationIntent = new Intent( this, BackgroundPingSender. class ) ;
+        //notificationIntent.putExtra("Alarmtask",true);
+        PendingIntent pendingIntent = PendingIntent. getBroadcast ( this, 0 , notificationIntent , PendingIntent. FLAG_UPDATE_CURRENT ) ;
+        long futureInMillis = SystemClock. elapsedRealtime () + 1000;
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context. ALARM_SERVICE ) ;
+        assert alarmManager != null;
+        alarmManager.cancel(pendingIntent);
+    }
+
 }
