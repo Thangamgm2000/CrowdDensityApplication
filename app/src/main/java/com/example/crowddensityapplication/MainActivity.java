@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -167,4 +168,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
 
+    public void openBluetooth(View view) {
+        Intent i = new Intent(this,BluetoothCommunicator.class);
+        startActivity(i);
+    }
 }
