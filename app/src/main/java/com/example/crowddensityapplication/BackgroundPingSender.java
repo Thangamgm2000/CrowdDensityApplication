@@ -20,9 +20,10 @@ public class BackgroundPingSender extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         hostContext = context;
-        sh = context.getSharedPreferences("active_endpoint_list", Context.MODE_PRIVATE);
+        /*sh = context.getSharedPreferences("active_endpoint_list", Context.MODE_PRIVATE);
         Toast.makeText(context,"data to be pinged",Toast.LENGTH_SHORT).show();
-        sendmessage(SystemClock. elapsedRealtime ()+"");
+        sendmessage(SystemClock. elapsedRealtime ()+"");*/
+
     }
     public void sendmessage(String msg)
     {
