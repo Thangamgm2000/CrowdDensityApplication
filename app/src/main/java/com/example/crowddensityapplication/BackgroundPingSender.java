@@ -1,5 +1,6 @@
 package com.example.crowddensityapplication;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,9 +21,9 @@ public class BackgroundPingSender extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         hostContext = context;
-        sh = context.getSharedPreferences("active_endpoint_list", Context.MODE_PRIVATE);
-        Toast.makeText(context,"data to be pinged",Toast.LENGTH_SHORT).show();
-        sendmessage(SystemClock. elapsedRealtime ()+"");
+        Toast.makeText(hostContext,"Ping started",Toast.LENGTH_SHORT).show();
+        BackgroundClientService.startActionPing(hostContext);
+
     }
     public void sendmessage(String msg)
     {

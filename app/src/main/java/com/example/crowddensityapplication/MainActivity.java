@@ -38,20 +38,23 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private FusedLocationProviderClient fusedLocationClient;
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private LocationManager locationManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         check_for_permissions();
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
     }
 
     private void getTimeFrequency(final double latitude, final double longitude) {
         String URLstring=  getString(R.string.server)+"/getZone";
+        Toast.makeText(getApplicationContext(),"zone request sent",Toast.LENGTH_SHORT).show();
         //showSimpleProgressDialog(this, "Loading...","Fetching the contents",false);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, URLstring,
                 new Response.Listener<String>() {
@@ -148,6 +151,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onLocationChanged(Location location) {
+        Toast.makeText(getApplicationContext(),location.getLatitude()+"",Toast.LENGTH_SHORT).show();
         locationManager.removeUpdates(this);
         getTimeFrequency(location.getLatitude(),location.getLongitude());
     }
@@ -168,8 +172,5 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
 
-    public void openBluetooth(View view) {
-        Intent i = new Intent(this,BluetoothCommunicator.class);
-        startActivity(i);
-    }
+
 }
