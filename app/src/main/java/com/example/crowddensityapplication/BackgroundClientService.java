@@ -3,13 +3,19 @@ package com.example.crowddensityapplication;
 import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -23,6 +29,8 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -34,6 +42,7 @@ public class BackgroundClientService extends IntentService {
     private static final String ACTION_PING = "com.example.crowddensityapplication.action.ping";
     private static final String ACTION_RESET_NAME = "com.example.crowddensityapplication.action.reset_name";
     int REQUEST_ENABLE_BT=1;
+
     ArrayList<String> arrayList;
 
 
@@ -67,6 +76,7 @@ public class BackgroundClientService extends IntentService {
         context.startService(intent);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
@@ -83,24 +93,36 @@ public class BackgroundClientService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void handleActionPing() {
         final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(bluetoothAdapter!=null)
         {
             bluetoothAdapter.startDiscovery();
             arrayList=new ArrayList<>();
+            arrayList.clear();
             arrayList.add("123");
-            IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-            registerReceiver(receiver,filter);
-            Handler handler = new Handler();
-            int delay = 15000;
-            Runnable runnable;
-            handler.postDelayed(runnable = new Runnable(){
-                public void run(){
-                    //do something
-                    sendDeviceList();
+
+            final BluetoothAdapter.LeScanCallback mScanCallback = new BluetoothAdapter.LeScanCallback() {
+                @Override
+                public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+                    arrayList.add(device.getName());
+                    Log.d("deviceFoundname",device.getName());
                 }
-            },delay);
+
+            };
+            int delay = 5000;
+            bluetoothAdapter.startLeScan(mScanCallback);
+
+            //sendDeviceList();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    //Do something after 10000ms
+                    sendDeviceList();
+                    bluetoothAdapter.stopLeScan(mScanCallback);
+                }
+            }, 10000);
 
         }
     }
@@ -113,7 +135,7 @@ public class BackgroundClientService extends IntentService {
                 {
                     @Override
                     public void onResponse(String response) {
-
+                        stopSelf();
                     }
                 },
                 new Response.ErrorListener()
@@ -147,20 +169,5 @@ public class BackgroundClientService extends IntentService {
         String devicename="temp";
     }
 
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                String deviceName = device.getName();
-                Log.d("deviceFoundname",deviceName);
-                arrayList.add(deviceName);
-            }
-        }
-    };
 
-    @Override
-    public void onDestroy() {
-        unregisterReceiver(receiver);
-    }
 }
