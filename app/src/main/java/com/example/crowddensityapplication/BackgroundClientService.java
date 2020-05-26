@@ -1,5 +1,6 @@
 package com.example.crowddensityapplication;
 
+import android.Manifest;
 import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -10,12 +11,18 @@ import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -37,14 +44,17 @@ import java.util.TimerTask;
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  */
-public class BackgroundClientService extends IntentService {
+public class BackgroundClientService extends IntentService implements LocationListener {
 
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_PING = "com.example.crowddensityapplication.action.ping";
     private static final String ACTION_RESET_NAME = "com.example.crowddensityapplication.action.reset_name";
-    int REQUEST_ENABLE_BT=1;
+    int REQUEST_ENABLE_BT = 1;
+    LocationManager locationManager;
 
     ArrayList<String> arrayList;
+    String latitude = "na";
+    String longitude="na";
 
 
     public BackgroundClientService() {
@@ -96,6 +106,18 @@ public class BackgroundClientService extends IntentService {
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void handleActionPing() {
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
         final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(bluetoothAdapter!=null)
         {
@@ -155,6 +177,11 @@ public class BackgroundClientService extends IntentService {
             {
                 Map<String, String>  params = new HashMap<String, String>();
                 params.put("devicesList",deviceListData.toString());
+                params.put("latitude",latitude);
+                params.put("longitude",longitude);
+                Long tsLong = System.currentTimeMillis()/1000;
+                String ts = tsLong.toString();
+                params.put("timestamp",ts);
                 Log.d("deviceList",deviceListData.toString());
 
                 return params;
@@ -173,4 +200,28 @@ public class BackgroundClientService extends IntentService {
     }
 
 
+    @Override
+    public void onLocationChanged(Location location) {
+        if(location!=null)
+        {
+            latitude = location.getLatitude()+"";
+            longitude = location.getLongitude()+"";
+            locationManager.removeUpdates(this);
+        }
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
 }
