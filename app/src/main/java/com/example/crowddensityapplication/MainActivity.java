@@ -119,14 +119,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void schedulePingBackground(long parseLong) {
-        Intent pingIntent = new Intent( this, BackgroundClientService.class ) ;
+        Intent pingIntent = new Intent( this, BackgroundPingSender.class ) ;
         //notificationIntent.putExtra("Alarmtask",true);
-        pingIntent.setAction("com.example.crowddensityapplication.action.ping");
-        PendingIntent pendingIntent = PendingIntent.getService ( this, 0 , pingIntent , PendingIntent. FLAG_UPDATE_CURRENT ) ;
+        PendingIntent pendingIntent = PendingIntent.getBroadcast ( this, 0 , pingIntent , PendingIntent. FLAG_UPDATE_CURRENT ) ;
         long futureInMillis = SystemClock. elapsedRealtime () + 1000;
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context. ALARM_SERVICE ) ;
         assert alarmManager != null;
-        alarmManager.setInexactRepeating(AlarmManager. ELAPSED_REALTIME_WAKEUP , futureInMillis, parseLong, pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager. RTC_WAKEUP , futureInMillis, parseLong, pendingIntent);
     }
 
     private void check_for_permissions() {

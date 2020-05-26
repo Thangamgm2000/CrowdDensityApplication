@@ -21,8 +21,9 @@ public class BackgroundPingSender extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         hostContext = context;
-        Toast.makeText(hostContext,"Ping started",Toast.LENGTH_SHORT).show();
-        BackgroundClientService.startActionPing(hostContext);
+        Intent serviceIntent = new Intent(context, DeviceScannerService.class);
+        hostContext.startService(serviceIntent);
+        Toast.makeText(hostContext,"Service started",Toast.LENGTH_SHORT).show();
 
     }
     public void sendmessage(String msg)
