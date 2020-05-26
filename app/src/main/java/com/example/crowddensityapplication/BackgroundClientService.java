@@ -28,6 +28,7 @@ import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -103,26 +104,28 @@ public class BackgroundClientService extends IntentService {
             arrayList.clear();
             arrayList.add("123");
 
-            final BluetoothAdapter.LeScanCallback mScanCallback = new BluetoothAdapter.LeScanCallback() {
+            final ScanCallback mScanCallback = new ScanCallback() {
                 @Override
-                public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-                    arrayList.add(device.getName());
-                    Log.d("deviceFoundname",device.getName());
+                public void onScanResult(int callbackType, ScanResult result) {
+                    super.onScanResult(callbackType, result);
+                    arrayList.add(result.getDevice().getName());
+                    Log.d("a_device_found",result.getDevice().getName());
                 }
-
             };
-            int delay = 5000;
-            bluetoothAdapter.startLeScan(mScanCallback);
-
+            final BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+            bluetoothLeScanner.startScan(mScanCallback);
             //sendDeviceList();
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     //Do something after 10000ms
+                    bluetoothLeScanner.flushPendingScanResults(mScanCallback);
+                    bluetoothLeScanner.stopScan(mScanCallback);
+                    bluetoothAdapter.cancelDiscovery();
                     sendDeviceList();
-                    bluetoothAdapter.stopLeScan(mScanCallback);
+
                 }
-            }, 10000);
+            }, 15000);
 
         }
     }
