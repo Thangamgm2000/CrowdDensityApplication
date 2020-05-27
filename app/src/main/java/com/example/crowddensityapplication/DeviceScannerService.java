@@ -1,6 +1,9 @@
 package com.example.crowddensityapplication;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -14,11 +17,13 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -42,6 +47,43 @@ public class DeviceScannerService extends Service implements LocationListener {
     ArrayList<String> arrayList;
     String latitude = "na";
     String longitude="na";
+    String CHANNEL_ID="Bluetooth Scanning";
+    int Notification_id=1;
+
+    @Override
+    public void onCreate() {
+        createNotificationChannel();
+        Notification notification = getNotification();
+        startForeground(Notification_id,notification);
+        super.onCreate();
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Scanning for bluetooth devices";
+            String description = "Periodical scans for bluetooth devices around you.";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager =  getSystemService(NotificationManager.class);
+            assert notificationManager != null;
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private Notification getNotification()
+    {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("Scanning for bluetooth devices")
+                .setContentText("Periodical scans for bluetooth devices around you.")
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setAutoCancel(true);
+        return builder.build();
+    }
 
     public DeviceScannerService() {
     }
@@ -54,10 +96,12 @@ public class DeviceScannerService extends Service implements LocationListener {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        createNotificationChannel();
+        Notification notification = getNotification();
+        startForeground(Notification_id,notification);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
+
             // here to request the missing permissions, and then overriding
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
             //                                          int[] grantResults)
@@ -78,14 +122,33 @@ public class DeviceScannerService extends Service implements LocationListener {
                 @Override
                 public void onScanResult(int callbackType, ScanResult result) {
                     super.onScanResult(callbackType, result);
-                    arrayList.add(result.getDevice().getName());
-                    Log.d("a_device_found",result.getDevice().getName());
+                    if(result!=null)
+                    {
+                        if (result.getDevice()!=null)
+                        {
+                            if(result.getDevice().getName()!=null) {
+                                arrayList.add(result.getDevice().getName());
+                                Log.d("a_device_found", result.getDevice().getName());
+                            }
+                        }
+                    }
+
                 }
             };
             final BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
             bluetoothLeScanner.startScan(mScanCallback);
             //sendDeviceList();
-            new Timer().schedule(new TimerTask() {
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    bluetoothLeScanner.flushPendingScanResults(mScanCallback);
+                    bluetoothLeScanner.stopScan(mScanCallback);
+                    bluetoothAdapter.cancelDiscovery();
+                    sendDeviceList();
+                }
+            },15000);
+            /*new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     //Do something after 10000ms
@@ -95,7 +158,7 @@ public class DeviceScannerService extends Service implements LocationListener {
                     sendDeviceList();
 
                 }
-            }, 15000);
+            }, 15000);*/
 
         }
 
