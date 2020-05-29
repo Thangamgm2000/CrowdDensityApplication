@@ -29,11 +29,11 @@ public class MapsActivity extends AppCompatActivity {
     private final int REQUEST_PERMISSION_EXTERNAL=1;
     String alpha = "#55";
     String red = "FF0000";
-    String orange = "FFA500";
-    String yellow = "FFFF00";
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    String orange = "C67700";
+    String green = "21C600";
+    MapView map;
+    public void initialize()
+    {
         org.osmdroid.config.IConfigurationProvider osmConf = org.osmdroid.config.Configuration.getInstance();
         File basePath = new File(getCacheDir().getAbsolutePath(), "osmdroid");
         osmConf.setOsmdroidBasePath(basePath);
@@ -43,35 +43,87 @@ public class MapsActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_PERMISSION_EXTERNAL);
         }
+    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initialize();
         setContentView(R.layout.activity_maps);
-        MapView map = (MapView) findViewById(R.id.map);
+
+
+        map= findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setBuiltInZoomControls(true);
         map.setMultiTouchControls(true);
 
-        GeoPoint startPoint = new GeoPoint(13.041297, 80.195952);
+        GeoPoint startPoint = new GeoPoint(13.040896, 80.198368);
         IMapController mapController = map.getController();
-        mapController.setZoom(19);
+        mapController.setZoom(15);
         mapController.setCenter(startPoint);
-//
-        List<GeoPoint> geoPoints = new ArrayList<>();
-        //add your points here
-        geoPoints.add(new GeoPoint(13.041297, 80.195952));
-        geoPoints.add(new GeoPoint(13.043262, 80.195158));
-        geoPoints.add(new GeoPoint(13.042367, 80.197841));
-        geoPoints.add(new GeoPoint(13.040896, 80.198368));
-        Polygon polygon = new Polygon();    //see note below
-        polygon.setPoints(geoPoints);
-        //geoPoints.add(geoPoints.get(0));    //forces the loop to close(connect last point to first point)
-        polygon.getFillPaint().setColor(Color.parseColor(alpha+red)); //set fill color
-        //polygon.getOutlinePaint().setColor(polygon.getFillPaint().getColor());
-        //polygon.getOutlinePaint().setStrokeWidth(0f);
-
-        //polygon.setStrokeColor(Color.RED);
-        polygon.setTitle("A sample polygon");
 
 
-        map.getOverlayManager().add(polygon);
+        drawZoneRed(new GeoPoint(13.040896, 80.188368),
+                new GeoPoint(13.040896, 80.198368),
+                new GeoPoint(13.050896, 80.198368),
+                new GeoPoint(13.050896, 80.188368));
+
+        drawZoneGreen(new GeoPoint(13.070896, 80.168368),
+                new GeoPoint(13.070896, 80.178368),
+                new GeoPoint(13.080896, 80.178368),
+                new GeoPoint(13.080896, 80.168368));
+
+        drawZoneOrange(new GeoPoint(13.020896, 80.158368),
+                new GeoPoint(13.020896, 80.148368),
+                new GeoPoint(13.030896, 80.148368),
+                new GeoPoint(13.030896, 80.158368));
+
+
+
         map.invalidate();
+    }
+    public void drawZoneRed(GeoPoint g1, GeoPoint g2, GeoPoint g3, GeoPoint g4)
+    {
+        List<GeoPoint> geoPoints = new ArrayList<>();
+        geoPoints.add(g1);
+        geoPoints.add(g2);
+        geoPoints.add(g3);
+        geoPoints.add(g4);
+        Polygon polygon = new Polygon();
+        polygon.setPoints(geoPoints);
+        polygon.getFillPaint().setColor(Color.parseColor(alpha+red));
+        polygon.getOutlinePaint().setColor(polygon.getFillPaint().getColor());
+        polygon.getOutlinePaint().setStrokeWidth(0f);
+        //polygon.setStrokeColor(Color.RED);
+        map.getOverlayManager().add(polygon);
+    }
+    public void drawZoneGreen(GeoPoint g1, GeoPoint g2, GeoPoint g3, GeoPoint g4)
+    {
+        List<GeoPoint> geoPoints = new ArrayList<>();
+        geoPoints.add(g1);
+        geoPoints.add(g2);
+        geoPoints.add(g3);
+        geoPoints.add(g4);
+        Polygon polygon = new Polygon();
+        polygon.setPoints(geoPoints);
+        polygon.getFillPaint().setColor(Color.parseColor(alpha+green));
+        polygon.getOutlinePaint().setColor(polygon.getFillPaint().getColor());
+        polygon.getOutlinePaint().setStrokeWidth(0f);
+        //polygon.setStrokeColor(Color.RED);
+        map.getOverlayManager().add(polygon);
+    }
+    public void drawZoneOrange(GeoPoint g1, GeoPoint g2, GeoPoint g3, GeoPoint g4)
+    {
+        List<GeoPoint> geoPoints = new ArrayList<>();
+        geoPoints.add(g1);
+        geoPoints.add(g2);
+        geoPoints.add(g3);
+        geoPoints.add(g4);
+        Polygon polygon = new Polygon();
+        polygon.setPoints(geoPoints);
+        polygon.getFillPaint().setColor(Color.parseColor(alpha+orange));
+        polygon.getOutlinePaint().setColor(polygon.getFillPaint().getColor());
+        polygon.getOutlinePaint().setStrokeWidth(0f);
+        //polygon.setStrokeColor(Color.RED);
+        map.getOverlayManager().add(polygon);
     }
 }
