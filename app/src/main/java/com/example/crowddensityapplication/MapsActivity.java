@@ -16,6 +16,7 @@ import android.view.View;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
@@ -55,6 +56,14 @@ public class MapsActivity extends AppCompatActivity {
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setBuiltInZoomControls(true);
         map.setMultiTouchControls(true);
+        map.setTileSource(
+                new XYTileSource("HttpMapnik",
+                        0, 19, 256, ".png", new String[] {
+                        "http://a.tile.openstreetmap.org/",
+                        "http://b.tile.openstreetmap.org/",
+                        "http://c.tile.openstreetmap.org/" },
+                        "© OpenStreetMap contributors")
+        );
 
         GeoPoint startPoint = new GeoPoint(13.040896, 80.198368);
         IMapController mapController = map.getController();
