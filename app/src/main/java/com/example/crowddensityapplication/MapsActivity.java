@@ -10,11 +10,16 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
+import org.osmdroid.events.DelayedMapListener;
+import org.osmdroid.events.MapListener;
+import org.osmdroid.events.ScrollEvent;
+import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
@@ -87,6 +92,21 @@ public class MapsActivity extends AppCompatActivity {
                 new GeoPoint(13.030896, 80.158368));*/
 
        MapNetworking mapNetworking = new MapNetworking(this,map);
+
+
+//       map.getMapCenter().getLatitude();
+//       map.getMapCenter().getLongitude();
+//       map.addMapListener(new MapListener() {
+//           @Override
+//           public boolean onScroll(ScrollEvent event) {
+//               return false;
+//           }
+//
+//           @Override
+//           public boolean onZoom(ZoomEvent event) {
+//               return false;
+//           }
+//       });
        mapNetworking.getZoneDensity(11.017553,76.969353);
         map.invalidate();
     }
