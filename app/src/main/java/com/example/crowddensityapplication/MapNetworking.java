@@ -13,10 +13,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.Projection;
 import org.osmdroid.views.overlay.Polygon;
 
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MapNetworking {
+class MapNetworking {
     private Context hostContext;
     private String alpha = "#55";
     String red = "FF0000";
@@ -33,13 +35,21 @@ public class MapNetworking {
     private MapView map;
     double base_lat = 11.0;
     double base_long = 76.9;
-    public MapNetworking(Context context,MapView map)
+    MapNetworking(Context context, MapView map)
     {
         this.hostContext = context;
         this.map = map;
     }
 
-    public void getZoneDensity(final double latitude, final double longitude)
+    void drawCurrentCenter()
+    {
+        Projection p = map.getProjection();
+        GeoPoint center = p.getCurrentCenter();
+        getZoneDensity(center.getLatitude(),center.getLatitude());
+        Toast.makeText(hostContext,center.getLatitude()+" "+center.getLongitude(),Toast.LENGTH_SHORT).show();
+    }
+
+    void getZoneDensity(final double latitude, final double longitude)
     {
         String URLstring=  hostContext.getString(R.string.server)+"/getZoneCount";
 
@@ -52,27 +62,37 @@ public class MapNetworking {
                         try {
 
                             JSONObject obj = new JSONObject(response);
-                            String zone = obj.getString("zone");
-                            String count = obj.getString("count");
-                            double density = Double.parseDouble(count);
+                            JSONArray zoneArray  = obj.getJSONArray("zones_data");
+                            for(int i =0;i<zoneArray.length();i++)
+                            {
+                                JSONObject dataobj = zoneArray.getJSONObject(i);
+                                String zone = dataobj.getString("zone");
+                                String count = dataobj.getString("count");
+                                if(!count.equals("nan"))
+                                {
+                                    double density = Double.parseDouble(count);
 
-                            String lat_val = zone.split("lat")[1].split("long")[0];
-                            String long_val = zone.split("lat")[1].split("long")[1];
-                            double lat1 = base_lat + Integer.parseInt(lat_val)*0.001;
-                            double long1 = base_long + Integer.parseInt(long_val)*0.001;
-                            Toast.makeText(hostContext,lat1+" "+long1,Toast.LENGTH_SHORT).show();
-                            if(density<10)
-                            {
-                                drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+green);
+                                    String lat_val = zone.split("lat")[1].split("long")[0];
+                                    String long_val = zone.split("lat")[1].split("long")[1];
+                                    double lat1 = base_lat + Integer.parseInt(lat_val)*0.001;
+                                    double long1 = base_long + Integer.parseInt(long_val)*0.001;
+
+                                    if(density<10)
+                                    {
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+green);
+                                    }
+                                    else if(density<20)
+                                    {
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+orange);
+                                    }
+                                    else
+                                    {
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+red);
+                                    }
+                                }
+
                             }
-                            else if(density<20)
-                            {
-                                drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+orange);
-                            }
-                            else
-                            {
-                                drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+red);
-                            }
+
 
 
                         } catch (JSONException e) {
