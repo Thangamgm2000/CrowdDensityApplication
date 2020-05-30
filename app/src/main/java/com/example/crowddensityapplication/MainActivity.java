@@ -61,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     @Override
                     public void onResponse(String response) {
                         //Log.d("strrrrr", ">>" + response);
-
                         try {
 
                             JSONObject obj = new JSONObject(response);

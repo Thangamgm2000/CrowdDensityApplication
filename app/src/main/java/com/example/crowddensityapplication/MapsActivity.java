@@ -65,18 +65,18 @@ public class MapsActivity extends AppCompatActivity {
                         "© OpenStreetMap contributors")
         );
 
-        GeoPoint startPoint = new GeoPoint(13.040896, 80.198368);
+       GeoPoint startPoint = new GeoPoint(11.017, 76.969);
         IMapController mapController = map.getController();
-        mapController.setZoom(15);
+        mapController.setZoom(18);
         mapController.setCenter(startPoint);
 
 
-        drawZoneRed(new GeoPoint(13.040896, 80.188368),
-                new GeoPoint(13.040896, 80.198368),
-                new GeoPoint(13.050896, 80.198368),
-                new GeoPoint(13.050896, 80.188368));
+        /*drawZoneRed(new GeoPoint(11.017, 76.969),
+                new GeoPoint(11.017, 76.970),
+                new GeoPoint(11.018, 76.969),
+                new GeoPoint(11.018, 76.970));*/
 
-        drawZoneGreen(new GeoPoint(13.070896, 80.168368),
+        /*drawZoneGreen(new GeoPoint(13.070896, 80.168368),
                 new GeoPoint(13.070896, 80.178368),
                 new GeoPoint(13.080896, 80.178368),
                 new GeoPoint(13.080896, 80.168368));
@@ -84,10 +84,10 @@ public class MapsActivity extends AppCompatActivity {
         drawZoneOrange(new GeoPoint(13.020896, 80.158368),
                 new GeoPoint(13.020896, 80.148368),
                 new GeoPoint(13.030896, 80.148368),
-                new GeoPoint(13.030896, 80.158368));
+                new GeoPoint(13.030896, 80.158368));*/
 
-
-
+       MapNetworking mapNetworking = new MapNetworking(this,map);
+       mapNetworking.getZoneDensity(11.017553,76.969353);
         map.invalidate();
     }
     public void drawZoneRed(GeoPoint g1, GeoPoint g2, GeoPoint g3, GeoPoint g4)

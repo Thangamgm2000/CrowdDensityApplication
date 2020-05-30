@@ -139,6 +139,7 @@ public class DeviceScannerService extends Service implements LocationListener {
             bluetoothLeScanner.startScan(mScanCallback);
             //sendDeviceList();
             Handler handler = new Handler();
+
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -147,7 +148,7 @@ public class DeviceScannerService extends Service implements LocationListener {
                     bluetoothAdapter.cancelDiscovery();
                     sendDeviceList();
                 }
-            },15000);
+            },30000);
             /*new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
