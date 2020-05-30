@@ -38,7 +38,7 @@ public class MapsActivity extends AppCompatActivity {
         org.osmdroid.config.IConfigurationProvider osmConf = org.osmdroid.config.Configuration.getInstance();
         File basePath = new File(getCacheDir().getAbsolutePath(), "osmdroid");
         osmConf.setOsmdroidBasePath(basePath);
-        Configuration.getInstance().setUserAgentValue(getApplicationContext().getPackageName());
+        Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
         File tileCache = new File(osmConf.getOsmdroidBasePath().getAbsolutePath(), "tile");
         osmConf.setOsmdroidTileCache(tileCache);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
