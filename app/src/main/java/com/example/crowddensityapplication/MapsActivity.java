@@ -8,11 +8,15 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Toast;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
@@ -23,13 +27,16 @@ import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.util.TileSystem;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.Projection;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polygon;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MapsActivity extends AppCompatActivity {
     private final int REQUEST_PERMISSION_EXTERNAL=1;
@@ -37,7 +44,8 @@ public class MapsActivity extends AppCompatActivity {
     String red = "FF0000";
     String orange = "C67700";
     String green = "21C600";
-    MapView map;
+    public MapView map;
+    public Projection p;
     public void initialize()
     {
         org.osmdroid.config.IConfigurationProvider osmConf = org.osmdroid.config.Configuration.getInstance();
@@ -49,6 +57,7 @@ public class MapsActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_PERMISSION_EXTERNAL);
         }
+        //getSupportActionBar().hide();
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +81,7 @@ public class MapsActivity extends AppCompatActivity {
 
        GeoPoint startPoint = new GeoPoint(11.017, 76.969);
         IMapController mapController = map.getController();
-        mapController.setZoom(18);
+        mapController.setZoom(15);
         mapController.setCenter(startPoint);
 
 
@@ -91,24 +100,37 @@ public class MapsActivity extends AppCompatActivity {
                 new GeoPoint(13.030896, 80.148368),
                 new GeoPoint(13.030896, 80.158368));*/
 
-       MapNetworking mapNetworking = new MapNetworking(this,map);
-
-
-//       map.getMapCenter().getLatitude();
-//       map.getMapCenter().getLongitude();
-//       map.addMapListener(new MapListener() {
-//           @Override
-//           public boolean onScroll(ScrollEvent event) {
-//               return false;
-//           }
-//
-//           @Override
-//           public boolean onZoom(ZoomEvent event) {
-//               return false;
-//           }
-//       });
-       mapNetworking.getZoneDensity(11.017553,76.969353);
+       //MapNetworking mapNetworking = new MapNetworking(this,map);
+       //mapNetworking.getZoneDensity(11.017553,76.969353);
         map.invalidate();
+
+        map.addMapListener(new MapListener() {
+            @Override
+            public boolean onScroll(ScrollEvent event) {
+
+                if(event!=null){
+                    int max_x=map.getWidth();
+                    int max_y=map.getHeight();
+
+                    Projection projection = map.getProjection();
+                    GeoPoint geoPointTopLeft = (GeoPoint) projection.fromPixels(max_x/2, max_y/2);
+                    Point topLeftPoint = new Point();
+                    // Get the top left Point (includes osmdroid offsets)
+                    projection.toPixels(geoPointTopLeft, topLeftPoint);
+                    // get the GeoPoint of any point on screen
+                    GeoPoint iGeoPoint = (GeoPoint) projection.fromPixels(max_x/2, max_y/2);
+                    Toast.makeText(MapsActivity.this,String.valueOf(iGeoPoint.getLatitude())+","+String.valueOf(iGeoPoint.getLongitude()),Toast.LENGTH_LONG).show();
+
+                }
+
+                return false;
+            }
+
+            @Override
+            public boolean onZoom(ZoomEvent event) {
+                return false;
+            }
+        });
     }
     public void drawZoneRed(GeoPoint g1, GeoPoint g2, GeoPoint g3, GeoPoint g4)
     {
