@@ -124,12 +124,17 @@ public class MapsActivity extends AppCompatActivity {
                     // Get the top left Point (includes osmdroid offsets)
                     projection.toPixels(geoPointTopLeft, topLeftPoint);
                     // get the GeoPoint of any point on screen
-                    GeoPoint iGeoPoint = (GeoPoint) projection.fromPixels(max_x/2, max_y/2);
+                    GeoPoint leftiGeoPoint = (GeoPoint) projection.fromPixels(0, max_y/2);
+                    GeoPoint rightiGeoPoint = (GeoPoint) projection.fromPixels(max_x, max_y/2);
+                    GeoPoint topiGeoPoint = (GeoPoint) projection.fromPixels(max_x/2, 0);
+                    GeoPoint bottomiGeoPoint = (GeoPoint) projection.fromPixels(max_x/2, max_y);
                     //Toast.makeText(MapsActivity.this,String.valueOf(iGeoPoint.getLatitude())+","+String.valueOf(iGeoPoint.getLongitude()),Toast.LENGTH_LONG).show();
 
                     //To be uncommented for street level density
-                    mapNetworking.getZoneDensity(iGeoPoint.getLatitude(),iGeoPoint.getLongitude());
-
+                    mapNetworking.getZoneDensity(leftiGeoPoint.getLatitude(),leftiGeoPoint.getLongitude());
+                    mapNetworking.getZoneDensity(rightiGeoPoint.getLatitude(),rightiGeoPoint.getLongitude());
+                    mapNetworking.getZoneDensity(topiGeoPoint.getLatitude(),topiGeoPoint.getLongitude());
+                    mapNetworking.getZoneDensity(bottomiGeoPoint.getLatitude(),bottomiGeoPoint.getLongitude());
                 }
                 return false;
             }
