@@ -46,6 +46,7 @@ public class MapsActivity extends AppCompatActivity {
     String green = "21C600";
     public MapView map;
     public Projection p;
+    double prev_zoom=18;
     MapNetworking mapNetworking;
     public void initialize()
     {
@@ -81,7 +82,7 @@ public class MapsActivity extends AppCompatActivity {
         );
 
        GeoPoint startPoint = new GeoPoint(11.017553, 76.969353);
-        IMapController mapController = map.getController();
+        final IMapController mapController = map.getController();
         mapController.setZoom(18);
         mapController.setCenter(startPoint);
 
@@ -114,7 +115,7 @@ public class MapsActivity extends AppCompatActivity {
         map.addMapListener(new DelayedMapListener(new MapListener() {
             @Override
             public boolean onScroll(ScrollEvent event) {
-                if(event!=null){
+                if(event!=null &&prev_zoom>17){
                     int max_x=map.getWidth();
                     int max_y=map.getHeight();
 
@@ -141,6 +142,34 @@ public class MapsActivity extends AppCompatActivity {
 
             @Override
             public boolean onZoom(ZoomEvent event) {
+                if(prev_zoom<17 && event.getZoomLevel()>=17)
+                {
+                    int max_x=map.getWidth();
+                    int max_y=map.getHeight();
+                    prev_zoom=event.getZoomLevel();
+                    Projection projection = map.getProjection();
+                    GeoPoint geoPointTopLeft = (GeoPoint) projection.fromPixels(max_x/2, max_y/2);
+                    Point topLeftPoint = new Point();
+                    // Get the top left Point (includes osmdroid offsets)
+                    projection.toPixels(geoPointTopLeft, topLeftPoint);
+                    // get the GeoPoint of any point on screen
+                    GeoPoint iGeoPoint = (GeoPoint) projection.fromPixels(max_x/2, max_y/2);
+
+                    map.getOverlays().clear();
+                    map.invalidate();
+                    mapNetworking.getZoneDensity(iGeoPoint.getLatitude(),iGeoPoint.getLongitude());
+                    mapController.setZoom(18.0);
+
+                }
+                else if(prev_zoom>=17 && event.getZoomLevel()<17){
+                    prev_zoom=event.getZoomLevel();
+                    mapController.setZoom(15.0);
+                    map.getOverlays().clear();
+                    map.invalidate();
+                    mapNetworking.getAreaZone();
+
+                    map.invalidate();
+            }
                 return false;
             }
         }));
