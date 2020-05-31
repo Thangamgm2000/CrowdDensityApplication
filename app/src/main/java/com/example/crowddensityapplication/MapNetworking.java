@@ -88,7 +88,10 @@ class MapNetworking {
                                     String long_val = zone.split("lat")[1].split("long")[1];
                                     double lat1 = base_lat + Integer.parseInt(lat_val)*0.001;
                                     double long1 = base_long + Integer.parseInt(long_val)*0.001;
-
+                                    if(isCovered(lat1,long1,boundaryBoxes.size()-1))
+                                    {
+                                        continue;
+                                    }
                                     if(density<10)
                                     {
                                         drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+green);
@@ -198,10 +201,7 @@ class MapNetworking {
                                     String long_val = zone.split("lat")[1].split("long")[1];
                                     double lat1 = base_lat + Integer.parseInt(lat_val)*0.01;
                                     double long1 = base_long + Integer.parseInt(long_val)*0.01;
-                                    if(isCovered(lat1,long1,boundaryBoxes.size()-1))
-                                    {
-                                        continue;
-                                    }
+
                                     if(density<10)
                                     {
                                         drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.01),new GeoPoint(lat1+0.01,long1+0.01),new GeoPoint(lat1+0.01,long1),alpha+green);
