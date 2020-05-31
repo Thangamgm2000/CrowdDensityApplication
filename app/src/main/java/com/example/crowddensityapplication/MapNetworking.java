@@ -35,22 +35,34 @@ class MapNetworking {
     private MapView map;
     double base_lat = 11.0;
     double base_long = 76.9;
+    ArrayList<BoundaryBox> boundaryBoxes;
     MapNetworking(Context context, MapView map)
     {
         this.hostContext = context;
         this.map = map;
+        boundaryBoxes = new ArrayList<BoundaryBox>();
     }
 
-    void drawCurrentCenter()
+    boolean isCovered(double lat,double lon,int n)
     {
-        Projection p = map.getProjection();
-        GeoPoint center = p.getCurrentCenter();
-        getZoneDensity(center.getLatitude(),center.getLatitude());
-        Toast.makeText(hostContext,center.getLatitude()+" "+center.getLongitude(),Toast.LENGTH_SHORT).show();
+        for(int i=0;i<n;i++)
+        {
+            BoundaryBox curr = boundaryBoxes.get(i);
+            if(lat>=curr.latMin && lat<=curr.latMax && lon>=curr.longMin && lon<=curr.longMax)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     void getZoneDensity(final double latitude, final double longitude)
     {
+        if(isCovered(latitude,longitude,boundaryBoxes.size()))
+        {
+            return;
+        }
+        boundaryBoxes.add(new BoundaryBox(latitude-0.005,longitude-0.005,latitude+0.005,longitude+0.005));
         String URLstring=  hostContext.getString(R.string.server)+"/getZoneCount";
 
         //showSimpleProgressDialog(this, "Loading...","Fetching the contents",false);
@@ -186,7 +198,10 @@ class MapNetworking {
                                     String long_val = zone.split("lat")[1].split("long")[1];
                                     double lat1 = base_lat + Integer.parseInt(lat_val)*0.01;
                                     double long1 = base_long + Integer.parseInt(long_val)*0.01;
-
+                                    if(isCovered(lat1,long1,boundaryBoxes.size()-1))
+                                    {
+                                        continue;
+                                    }
                                     if(density<10)
                                     {
                                         drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.01),new GeoPoint(lat1+0.01,long1+0.01),new GeoPoint(lat1+0.01,long1),alpha+green);
@@ -242,4 +257,16 @@ class MapNetworking {
         requestQueue.add(stringRequest);
     }
 
+}
+
+class BoundaryBox
+{
+    double latMin,latMax,longMin,longMax;
+    public BoundaryBox(double latMin,double longMin,double latMax, double longMax)
+    {
+        this.latMin=latMin;
+        this.latMax=latMax;
+        this.longMax = longMax;
+        this.longMin = longMin;
+    }
 }

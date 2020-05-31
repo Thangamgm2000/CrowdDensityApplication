@@ -82,15 +82,15 @@ public class MapsActivity extends AppCompatActivity {
 
        GeoPoint startPoint = new GeoPoint(11.017553, 76.969353);
         IMapController mapController = map.getController();
-        mapController.setZoom(15);
+        mapController.setZoom(18);
         mapController.setCenter(startPoint);
 
 
 
       mapNetworking = new MapNetworking(this,map);
        //mapNetworking.drawCurrentCenter();
-        //mapNetworking.getZoneDensity(11.017553,76.969353);
-        mapNetworking.getAreaZone();
+        mapNetworking.getZoneDensity(11.017553,76.969353);
+        //mapNetworking.getAreaZone();
         map.invalidate();
 
 //       map.getMapCenter().getLatitude();
@@ -128,7 +128,7 @@ public class MapsActivity extends AppCompatActivity {
                     //Toast.makeText(MapsActivity.this,String.valueOf(iGeoPoint.getLatitude())+","+String.valueOf(iGeoPoint.getLongitude()),Toast.LENGTH_LONG).show();
 
                     //To be uncommented for street level density
-                    //mapNetworking.getZoneDensity(iGeoPoint.getLatitude(),iGeoPoint.getLongitude());
+                    mapNetworking.getZoneDensity(iGeoPoint.getLatitude(),iGeoPoint.getLongitude());
 
                 }
                 return false;
