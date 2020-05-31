@@ -142,7 +142,7 @@ public class MapsActivity extends AppCompatActivity {
 
             @Override
             public boolean onZoom(ZoomEvent event) {
-                Toast.makeText(getApplicationContext(),event.getZoomLevel()+"",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(),event.getZoomLevel()+"",Toast.LENGTH_SHORT).show();
                 if(prev_zoom<17 && event.getZoomLevel()>=17)
                 {
                     prev_zoom = 18;
@@ -165,7 +165,7 @@ public class MapsActivity extends AppCompatActivity {
                 }
                 else if(prev_zoom>=17 && event.getZoomLevel()<17){
                     prev_zoom=event.getZoomLevel();
-                    mapController.setZoom(16.0);
+                    mapController.setZoom(15.0);
                     map.getOverlays().clear();
                     map.invalidate();
                     mapNetworking.getAreaZone();
