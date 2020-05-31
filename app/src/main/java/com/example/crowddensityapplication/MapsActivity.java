@@ -81,14 +81,15 @@ public class MapsActivity extends AppCompatActivity {
 
        GeoPoint startPoint = new GeoPoint(11.017553, 76.969353);
         IMapController mapController = map.getController();
-        mapController.setZoom(18);
+        mapController.setZoom(15);
         mapController.setCenter(startPoint);
 
 
 
        MapNetworking mapNetworking = new MapNetworking(this,map);
        //mapNetworking.drawCurrentCenter();
-        mapNetworking.getZoneDensity(11.017553,76.969353);
+        //mapNetworking.getZoneDensity(11.017553,76.969353);
+        mapNetworking.getAreaZone();
         map.invalidate();
 
 //       map.getMapCenter().getLatitude();
@@ -182,4 +183,5 @@ public class MapsActivity extends AppCompatActivity {
         //polygon.setStrokeColor(Color.RED);
         map.getOverlayManager().add(polygon);
     }
+
 }

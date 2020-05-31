@@ -159,4 +159,87 @@ class MapNetworking {
         map.invalidate();
     }
 
+    void getAreaZone()
+    {
+        String URLstring=  hostContext.getString(R.string.server)+"/getAreaZone";
+
+        //showSimpleProgressDialog(this, "Loading...","Fetching the contents",false);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, URLstring,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //Log.d("strrrrr", ">>" + response);
+                        try {
+
+                            JSONObject obj = new JSONObject(response);
+                            JSONArray zoneArray  = obj.getJSONArray("zones_data");
+                            for(int i =0;i<zoneArray.length();i++)
+                            {
+                                JSONObject dataobj = zoneArray.getJSONObject(i);
+                                String zone = dataobj.getString("zone");
+                                String count = dataobj.getString("count");
+                                if(!count.equals("nan"))
+                                {
+                                    double density = Double.parseDouble(count);
+
+                                    String lat_val = zone.split("lat")[1].split("long")[0];
+                                    String long_val = zone.split("lat")[1].split("long")[1];
+                                    double lat1 = base_lat + Integer.parseInt(lat_val)*0.01;
+                                    double long1 = base_long + Integer.parseInt(long_val)*0.01;
+
+                                    if(density<10)
+                                    {
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.01),new GeoPoint(lat1+0.01,long1+0.01),new GeoPoint(lat1+0.01,long1),alpha+green);
+                                    }
+                                    else if(density<20)
+                                    {
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.01),new GeoPoint(lat1+0.01,long1+0.01),new GeoPoint(lat1+0.01,long1),alpha+orange);
+                                    }
+                                    else
+                                    {
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.01),new GeoPoint(lat1+0.01,long1+0.01),new GeoPoint(lat1+0.01,long1),alpha+red);
+                                    }
+                                }
+
+                            }
+
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //displaying the error in toast if occurrs
+                        Log.d("Error.Response", error.toString());
+                        Toast.makeText(hostContext, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                })
+        {
+        };
+        stringRequest.setRetryPolicy(new RetryPolicy() {
+            @Override
+            public int getCurrentTimeout() {
+                return 50000;
+            }
+
+            @Override
+            public int getCurrentRetryCount() {
+                return 500;
+            }
+
+            @Override
+            public void retry(VolleyError error) throws VolleyError {
+
+            }
+        });
+
+        // request queue
+        RequestQueue requestQueue = Volley.newRequestQueue(hostContext);
+        requestQueue.add(stringRequest);
+    }
+
 }
