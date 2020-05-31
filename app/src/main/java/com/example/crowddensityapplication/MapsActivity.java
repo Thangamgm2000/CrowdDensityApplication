@@ -46,6 +46,7 @@ public class MapsActivity extends AppCompatActivity {
     String green = "21C600";
     public MapView map;
     public Projection p;
+    MapNetworking mapNetworking;
     public void initialize()
     {
         org.osmdroid.config.IConfigurationProvider osmConf = org.osmdroid.config.Configuration.getInstance();
@@ -86,7 +87,7 @@ public class MapsActivity extends AppCompatActivity {
 
 
 
-       MapNetworking mapNetworking = new MapNetworking(this,map);
+      mapNetworking = new MapNetworking(this,map);
        //mapNetworking.drawCurrentCenter();
         //mapNetworking.getZoneDensity(11.017553,76.969353);
         mapNetworking.getAreaZone();
@@ -110,10 +111,9 @@ public class MapsActivity extends AppCompatActivity {
        //mapNetworking.getZoneDensity(11.017553,76.969353);
         map.invalidate();
 
-        map.addMapListener(new MapListener() {
+        map.addMapListener(new DelayedMapListener(new MapListener() {
             @Override
             public boolean onScroll(ScrollEvent event) {
-
                 if(event!=null){
                     int max_x=map.getWidth();
                     int max_y=map.getHeight();
@@ -127,8 +127,10 @@ public class MapsActivity extends AppCompatActivity {
                     GeoPoint iGeoPoint = (GeoPoint) projection.fromPixels(max_x/2, max_y/2);
                     //Toast.makeText(MapsActivity.this,String.valueOf(iGeoPoint.getLatitude())+","+String.valueOf(iGeoPoint.getLongitude()),Toast.LENGTH_LONG).show();
 
-                }
+                    //To be uncommented for street level density
+                    //mapNetworking.getZoneDensity(iGeoPoint.getLatitude(),iGeoPoint.getLongitude());
 
+                }
                 return false;
             }
 
@@ -136,7 +138,7 @@ public class MapsActivity extends AppCompatActivity {
             public boolean onZoom(ZoomEvent event) {
                 return false;
             }
-        });
+        }));
     }
     public void drawZoneRed(GeoPoint g1, GeoPoint g2, GeoPoint g3, GeoPoint g4)
     {
