@@ -62,7 +62,7 @@ class MapNetworking {
         {
             return;
         }
-        boundaryBoxes.add(new BoundaryBox(latitude-0.005,longitude-0.005,latitude+0.005,longitude+0.005));
+        boundaryBoxes.add(new BoundaryBox(latitude-0.006,longitude-0.006,latitude+0.005,longitude+0.005));
         String URLstring=  hostContext.getString(R.string.server)+"/getZoneCount";
 
         //showSimpleProgressDialog(this, "Loading...","Fetching the contents",false);
