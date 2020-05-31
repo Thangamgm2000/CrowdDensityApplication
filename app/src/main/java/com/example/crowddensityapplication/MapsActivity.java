@@ -115,7 +115,7 @@ public class MapsActivity extends AppCompatActivity {
         map.addMapListener(new DelayedMapListener(new MapListener() {
             @Override
             public boolean onScroll(ScrollEvent event) {
-                if(event!=null &&prev_zoom>17){
+                if(event!=null &&prev_zoom>=17){
                     int max_x=map.getWidth();
                     int max_y=map.getHeight();
 
@@ -142,8 +142,10 @@ public class MapsActivity extends AppCompatActivity {
 
             @Override
             public boolean onZoom(ZoomEvent event) {
+                Toast.makeText(getApplicationContext(),event.getZoomLevel()+"",Toast.LENGTH_SHORT).show();
                 if(prev_zoom<17 && event.getZoomLevel()>=17)
                 {
+                    prev_zoom = 18;
                     mapController.setZoom(18.0);
                     int max_x=map.getWidth();
                     int max_y=map.getHeight();
@@ -157,15 +159,13 @@ public class MapsActivity extends AppCompatActivity {
                     GeoPoint iGeoPoint = (GeoPoint) projection.fromPixels(max_x/2, max_y/2);
 
                     map.getOverlays().clear();
-                    map.invalidate();
-
                     mapNetworking.getZoneDensity(iGeoPoint.getLatitude(),iGeoPoint.getLongitude());
-
+                    map.invalidate();
 
                 }
                 else if(prev_zoom>=17 && event.getZoomLevel()<17){
                     prev_zoom=event.getZoomLevel();
-                    mapController.setZoom(15.0);
+                    mapController.setZoom(16.0);
                     map.getOverlays().clear();
                     map.invalidate();
                     mapNetworking.getAreaZone();
