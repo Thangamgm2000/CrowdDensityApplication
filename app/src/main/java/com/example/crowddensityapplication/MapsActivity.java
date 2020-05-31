@@ -144,6 +144,7 @@ public class MapsActivity extends AppCompatActivity {
             public boolean onZoom(ZoomEvent event) {
                 if(prev_zoom<17 && event.getZoomLevel()>=17)
                 {
+                    mapController.setZoom(18.0);
                     int max_x=map.getWidth();
                     int max_y=map.getHeight();
                     prev_zoom=event.getZoomLevel();
@@ -157,8 +158,9 @@ public class MapsActivity extends AppCompatActivity {
 
                     map.getOverlays().clear();
                     map.invalidate();
+
                     mapNetworking.getZoneDensity(iGeoPoint.getLatitude(),iGeoPoint.getLongitude());
-                    mapController.setZoom(18.0);
+
 
                 }
                 else if(prev_zoom>=17 && event.getZoomLevel()<17){
