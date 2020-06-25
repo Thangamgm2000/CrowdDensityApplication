@@ -9,8 +9,7 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.widget.Toast;
 
-import com.google.android.gms.nearby.Nearby;
-import com.google.android.gms.nearby.connection.Payload;
+
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -33,19 +32,5 @@ public class BackgroundPingSender extends BroadcastReceiver {
         Toast.makeText(hostContext,"Service started",Toast.LENGTH_SHORT).show();
 
     }
-    public void sendmessage(String msg)
-    {
-        byte[] message = new byte[0];
-        try {
-            message= msg.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace(); }
-        Payload bytesPayload = Payload.fromBytes(message);
-        Map<String, ?> allEntries = sh.getAll();
-        for(String endpointId: allEntries.keySet())
-        {
-            Nearby.getConnectionsClient(hostContext).sendPayload(endpointId,bytesPayload);
-        }
 
-    }
 }

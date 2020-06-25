@@ -19,6 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
@@ -31,12 +32,19 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 
 import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -44,17 +52,20 @@ public class DeviceScannerService extends Service implements LocationListener {
 
     LocationManager locationManager;
 
-    ArrayList<String> arrayList;
+    Set<String> deviceList;
     String latitude = "na";
-    String longitude="na";
-    String CHANNEL_ID="Bluetooth Scanning";
-    int Notification_id=1;
+    String longitude = "na";
+    String CHANNEL_ID = "Bluetooth Scanning";
+    int Notification_id = 1;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
+    private LocationRequest locationRequest;
 
     @Override
     public void onCreate() {
         createNotificationChannel();
         Notification notification = getNotification();
-        startForeground(Notification_id,notification);
+        startForeground(Notification_id, notification);
         super.onCreate();
     }
 
@@ -69,14 +80,13 @@ public class DeviceScannerService extends Service implements LocationListener {
             channel.setDescription(description);
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
-            NotificationManager notificationManager =  getSystemService(NotificationManager.class);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
             assert notificationManager != null;
             notificationManager.createNotificationChannel(channel);
         }
     }
 
-    private Notification getNotification()
-    {
+    private Notification getNotification() {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Scanning for bluetooth devices")
                 .setContentText("Periodical scans for bluetooth devices around you.")
@@ -98,8 +108,26 @@ public class DeviceScannerService extends Service implements LocationListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         createNotificationChannel();
         Notification notification = getNotification();
-        startForeground(Notification_id,notification);
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        startForeground(Notification_id, notification);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationRequest = new LocationRequest().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(3000);
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                Location last = locationResult.getLastLocation();
+                if (last != null) {
+                    latitude = last.getLatitude() + "";
+                    longitude = last.getLongitude() + "";
+                    fusedLocationClient.removeLocationUpdates(locationCallback);
+                }
+            }
+        };
+        
+        startLocationUpdates();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             // here to request the missing permissions, and then overriding
@@ -109,25 +137,22 @@ public class DeviceScannerService extends Service implements LocationListener {
             // for ActivityCompat#requestPermissions for more details.
             return super.onStartCommand(intent, flags, startId);
         }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
+        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
         final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(bluetoothAdapter!=null)
-        {
+        if (bluetoothAdapter != null) {
             bluetoothAdapter.startDiscovery();
-            arrayList=new ArrayList<>();
-            arrayList.clear();
-            arrayList.add("123");
+            deviceList = new HashSet<String>();
+            deviceList.clear();
+
 
             final ScanCallback mScanCallback = new ScanCallback() {
                 @Override
                 public void onScanResult(int callbackType, ScanResult result) {
                     super.onScanResult(callbackType, result);
-                    if(result!=null)
-                    {
-                        if (result.getDevice()!=null)
-                        {
-                            if(result.getDevice().getName()!=null) {
-                                arrayList.add(result.getDevice().getName());
+                    if (result != null) {
+                        if (result.getDevice() != null) {
+                            if (result.getDevice().getName() != null) {
+                                deviceList.add(result.getDevice().getName());
                                 Log.d("a_device_found", result.getDevice().getName());
                             }
                         }
@@ -148,7 +173,7 @@ public class DeviceScannerService extends Service implements LocationListener {
                     bluetoothAdapter.cancelDiscovery();
                     sendDeviceList();
                 }
-            },30000);
+            }, 30000);
             /*new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -168,18 +193,15 @@ public class DeviceScannerService extends Service implements LocationListener {
     }
 
     private void sendDeviceList() {
-        final JSONArray deviceListData= new JSONArray(arrayList);
-        String url = getString(R.string.server)+"/pingDeviceList";
+        String url = getString(R.string.server) + "/updateContent";
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>()
-                {
+                new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         stopSelf();
                     }
                 },
-                new Response.ErrorListener()
-                {
+                new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
@@ -188,16 +210,14 @@ public class DeviceScannerService extends Service implements LocationListener {
                 }
         ) {
             @Override
-            protected Map<String, String> getParams()
-            {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("devicesList",deviceListData.toString());
-                params.put("latitude",latitude);
-                params.put("longitude",longitude);
-                Long tsLong = System.currentTimeMillis()/1000;
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("latitude", latitude);
+                params.put("longitude", longitude);
+                Long tsLong = System.currentTimeMillis() / 1000;
                 String ts = tsLong.toString();
-                params.put("timestamp",ts);
-                Log.d("deviceList",deviceListData.toString());
+                params.put("timestamp", ts);
+                params.put("deviceCount", deviceList.size() + 1 + "");
 
                 return params;
             }
@@ -208,10 +228,9 @@ public class DeviceScannerService extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        if(location!=null)
-        {
-            latitude = location.getLatitude()+"";
-            longitude = location.getLongitude()+"";
+        if (location != null) {
+            latitude = location.getLatitude() + "";
+            longitude = location.getLongitude() + "";
             locationManager.removeUpdates(this);
         }
     }
@@ -230,4 +249,21 @@ public class DeviceScannerService extends Service implements LocationListener {
     public void onProviderDisabled(String provider) {
 
     }
+
+
+    private void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest,
+                locationCallback,
+                Looper.getMainLooper());
+    }
+
 }

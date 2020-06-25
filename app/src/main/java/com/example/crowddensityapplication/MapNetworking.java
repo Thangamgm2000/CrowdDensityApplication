@@ -33,8 +33,8 @@ class MapNetworking {
     private String orange = "C67700";
     String green = "21C600";
     private MapView map;
-    double base_lat = 11.0;
-    double base_long = 76.9;
+    double base_lat = 11.01;
+    double base_long = 76.96;
     ArrayList<BoundaryBox> boundaryBoxes;
     MapNetworking(Context context, MapView map)
     {
@@ -62,7 +62,7 @@ class MapNetworking {
         {
             return;
         }
-        boundaryBoxes.add(new BoundaryBox(latitude-0.006,longitude-0.006,latitude+0.005,longitude+0.005));
+        boundaryBoxes.add(new BoundaryBox(latitude-0.0006,longitude-0.0006,latitude+0.0005,longitude+0.0005));
         String URLstring=  hostContext.getString(R.string.server)+"/getZoneCount";
 
         //showSimpleProgressDialog(this, "Loading...","Fetching the contents",false);
@@ -86,23 +86,23 @@ class MapNetworking {
 
                                     String lat_val = zone.split("lat")[1].split("long")[0];
                                     String long_val = zone.split("lat")[1].split("long")[1];
-                                    double lat1 = base_lat + Integer.parseInt(lat_val)*0.001;
-                                    double long1 = base_long + Integer.parseInt(long_val)*0.001;
+                                    double lat1 = base_lat + Integer.parseInt(lat_val)*0.0001;
+                                    double long1 = base_long + Integer.parseInt(long_val)*0.0001;
                                     if(isCovered(lat1,long1,boundaryBoxes.size()-1))
                                     {
                                         continue;
                                     }
                                     if(density<10)
                                     {
-                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+green);
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.0001),new GeoPoint(lat1+0.0001,long1+0.0001),new GeoPoint(lat1+0.0001,long1),alpha+green);
                                     }
                                     else if(density<20)
                                     {
-                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+orange);
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.0001),new GeoPoint(lat1+0.0001,long1+0.0001),new GeoPoint(lat1+0.0001,long1),alpha+orange);
                                     }
                                     else
                                     {
-                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+red);
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.0001),new GeoPoint(lat1+0.0001,long1+0.0001),new GeoPoint(lat1+0.0001,long1),alpha+red);
                                     }
                                 }
 
@@ -143,7 +143,7 @@ class MapNetworking {
 
             @Override
             public int getCurrentRetryCount() {
-                return 500;
+                return 10;
             }
 
             @Override
@@ -199,20 +199,20 @@ class MapNetworking {
 
                                     String lat_val = zone.split("lat")[1].split("long")[0];
                                     String long_val = zone.split("lat")[1].split("long")[1];
-                                    double lat1 = base_lat + Integer.parseInt(lat_val)*0.01;
-                                    double long1 = base_long + Integer.parseInt(long_val)*0.01;
+                                    double lat1 = base_lat + Integer.parseInt(lat_val)*0.001;
+                                    double long1 = base_long + Integer.parseInt(long_val)*0.001;
 
                                     if(density<10)
                                     {
-                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.01),new GeoPoint(lat1+0.01,long1+0.01),new GeoPoint(lat1+0.01,long1),alpha+green);
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+green);
                                     }
                                     else if(density<20)
                                     {
-                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.01),new GeoPoint(lat1+0.01,long1+0.01),new GeoPoint(lat1+0.01,long1),alpha+orange);
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+orange);
                                     }
                                     else
                                     {
-                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.01),new GeoPoint(lat1+0.01,long1+0.01),new GeoPoint(lat1+0.01,long1),alpha+red);
+                                        drawZone(new GeoPoint(lat1,long1),new GeoPoint(lat1,long1+0.001),new GeoPoint(lat1+0.001,long1+0.001),new GeoPoint(lat1+0.001,long1),alpha+red);
                                     }
                                 }
 
